@@ -1,0 +1,29 @@
+from heapq import heappop, heappush
+
+def astar(start, goal):
+    def h(s): return sum(abs((v-1)%3-c) + abs((v-1)//3-r) for r, row in enumerate(s) for c, v in enumerate(row) if v)
+    q, seen = [(h(start), start)], {start: None}
+    while q:
+        _, state = heappop(q)
+        if state == goal:
+            path = []
+            while state is not None:
+                path.append(state)
+                state = seen[state]
+            return path[::-1]
+        r, c = next((r, c) for r, row in enumerate(state) for c, v in enumerate(row) if v == 0)
+        for dr, dc in [(-1,0), (1,0), (0,-1), (0,1)]:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < 3 and 0 <= nc < 3:
+                new_state = list(list(row) for row in state)
+                new_state[r][c], new_state[nr][nc] = new_state[nr][nc], new_state[r][c]
+                new_state = tuple(tuple(row) for row in new_state)
+                if new_state not in seen:
+                    seen[new_state] = state
+                    heappush(q, (len(seen) + h(new_state), new_state))
+
+start, goal = ((1,2,3),(4,0,5),(7,8,6)), ((1,2,3),(4,5,6),(7,8,0))
+print("Initial State:")
+for row in start: print(row)
+print("\nGoal State:")
+for row in goal: print(row)
